@@ -62,22 +62,26 @@ const server = new ApolloServer({
 const PORT = 4000;
 
 const startServer = async () => {
-  await server.start();
-  app.use(
-    "/graphql",
-    cors<cors.CorsRequest>(),
-    bodyParser.json(),
-    expressMiddleware(server)
-  );
-
-  const PORT = 4000;
-  // Now that our HTTP server is fully set up, we can listen to it.
-  httpServer.listen(PORT, () => {
-    console.log(`Server is now running on http://localhost:${PORT}/graphql`);
-    console.log(
-      `🚀 Subscription endpoint ready at ws://localhost:${PORT}/graphql`
+  try {
+    await server.start();
+    app.use(
+      "/graphql",
+      cors<cors.CorsRequest>(),
+      bodyParser.json(),
+      expressMiddleware(server)
     );
-  });
+
+    const PORT = 4000;
+    // Now that our HTTP server is fully set up, we can listen to it.
+    httpServer.listen(PORT, () => {
+      console.log(`Server is now running on http://localhost:${PORT}/graphql`);
+      console.log(
+        `🚀 Subscription endpoint ready at ws://localhost:${PORT}/graphql`
+      );
+    });
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 startServer();
