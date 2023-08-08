@@ -14,10 +14,6 @@ import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHt
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import { WebSocketServer } from "ws";
 import { useServer } from "graphql-ws/lib/use/ws";
-import { currentNumberArray } from "./utils/constants";
-import { PubSub } from "graphql-subscriptions";
-
-const pubsub = new PubSub();
 
 const app = express();
 app.use(cors());
@@ -85,13 +81,3 @@ const startServer = async () => {
 };
 
 startServer();
-
-function incrementNumber() {
-  currentNumberArray.push(1);
-  pubsub.publish("NUMBER_INCREMENTED", {
-    numberIncremented: currentNumberArray,
-  });
-  setTimeout(incrementNumber, 1000);
-}
-
-//incrementNumber();
