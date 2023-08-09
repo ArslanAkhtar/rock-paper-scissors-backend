@@ -6,10 +6,7 @@ import { Rooms, MakeChoice } from "../utils/types";
 import { withFilter } from "graphql-subscriptions";
 const pubsub = new PubSub();
 
-const rooms: Record<
-  string,
-  { playerOne: GameOption | null; playerTwo: GameOption | null }
-> = {};
+const rooms: Rooms = {};
 const resolvers = {
   Query: {
     currentStatus: (parent: any, args: { roomId: number }) => {
@@ -59,10 +56,16 @@ const resolvers = {
             winner,
           },
         });
-        return "Both Players completed there moves";
+        return {
+          playerOne: rooms[roomId].playerOne,
+          playerTwo: rooms[roomId].playerTwo,
+        };
       }
 
-      return `Player ${playerId} has made a choice`;
+      return {
+        playerOne: rooms[roomId].playerOne,
+        playerTwo: rooms[roomId].playerTwo,
+      };
     },
   },
   Subscription: {

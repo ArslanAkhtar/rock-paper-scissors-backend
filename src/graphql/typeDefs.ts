@@ -1,5 +1,3 @@
-import { GameOption, GameResult } from "../utils/enums";
-
 const typeDefs = `#graphql
 
 type Query {
@@ -14,9 +12,14 @@ type GameUpdate {
   result: String!
 }
 
+type Rooms {
+  playerOne: String
+  playerTwo: String
+}
+
 type Mutation {
   createRoom(roomId: ID!): Boolean
-  makeChoice(roomId: ID!, choice: String!, playerId: Int!): String!
+  makeChoice(roomId: ID!, choice: String!, playerId: Int!): Rooms
 }
 
 type Subscription {
