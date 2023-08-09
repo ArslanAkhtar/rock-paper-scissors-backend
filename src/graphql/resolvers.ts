@@ -12,11 +12,16 @@ const rooms: Record<
 > = {};
 const resolvers = {
   Query: {
-    currentStatus(roomId: number) {
-      if (!rooms[roomId]) {
-        return "Room does not exist";
-      }
-      return rooms[roomId];
+    currentStatus: (parent: any, args: { roomId: number }) => {
+      return {
+        roomId: args.roomId,
+        playerOneChoice: rooms[args.roomId].playerOne,
+        playerTwoChoice: rooms[args.roomId].playerTwo,
+        result: determineWinner(
+          rooms[args.roomId].playerOne as GameOption,
+          rooms[args.roomId].playerTwo as GameOption
+        ),
+      };
     },
   },
   Mutation: {
