@@ -8,3 +8,5 @@ export const books = [
     author: "Paul Auster",
   },
 ];
+
+export const currentNumberArray = [1, 1, 1];
