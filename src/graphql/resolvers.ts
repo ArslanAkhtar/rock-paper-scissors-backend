@@ -11,12 +11,28 @@ const players: User[] = [];
 const resolvers = {
   Query: {
     currentStatus: (parent: any, args: { roomId: number }) => {
-      console.log("args", rooms[args.roomId].PlayerChoices);
-      return {
-        roomId: args.roomId,
-        playerChoices: rooms[args.roomId].PlayerChoices,
-        result: determineWinner(rooms[args.roomId].PlayerChoices),
-      };
+      const currentRoom = rooms[args.roomId];
+      if (!currentRoom)
+        return {
+          error: "Room does not exist",
+        };
+
+      if (currentRoom.PlayerChoices.length === 0) {
+        return {
+          error: "Waiting for players to make a choices",
+        };
+      } else if (currentRoom.PlayerChoices.length < 2) {
+        return {
+          roomId: args.roomId,
+          playerChoices: rooms[args.roomId].PlayerChoices,
+        };
+      } else {
+        return {
+          roomId: args.roomId,
+          playerChoices: rooms[args.roomId].PlayerChoices,
+          result: determineWinner(rooms[args.roomId].PlayerChoices),
+        };
+      }
     },
   },
   Mutation: {
@@ -27,7 +43,10 @@ const resolvers = {
       if (players.find((player) => player.id === data.playerId)) {
         return "User already exists";
       } else {
-        players.push({ id: data.playerId, playerName: data.playerName });
+        players.push({
+          id: data.playerId as number,
+          playerName: data.playerName,
+        });
         return "User registered";
       }
     },
@@ -47,7 +66,7 @@ const resolvers = {
         };
       }
 
-      if (players.find((player) => player.id === playerId)) {
+      if (!players.find((player: User) => player.id == playerId)) {
         return {
           error: "Player does not exist",
         };

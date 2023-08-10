@@ -1,18 +1,19 @@
 const typeDefs = `#graphql
 
 type Query {
-  currentStatus(roomId: ID!): GameUpdate!
+  currentStatus(roomId: ID!): GameUpdate
 }
 
 
 type GameUpdate {
-  roomId: ID!
-  PlayerChoices: [PlayerChoice]
+  error: String
+  playerChoices: [PlayerChoice]
+  roomId: ID
   result: String
 }
 
 type PlayerChoice {
-  PlayerId: Int!
+  PlayerId: Int
   PlayerChoice: String
 }
 
