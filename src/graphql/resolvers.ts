@@ -2,69 +2,78 @@ import { currentNumberArray } from "../utils/constants";
 import { PubSub } from "graphql-subscriptions";
 import { GameOption, GameResult } from "../utils/enums";
 import { determineWinner } from "../controllers/gameLogic";
-import { Rooms, MakeChoice } from "../utils/types";
+import { Rooms, MakeChoice, User, PlayerChoice } from "../utils/types";
 import { withFilter } from "graphql-subscriptions";
 const pubsub = new PubSub();
 
 const rooms: Rooms = {};
+const players: User[] = [];
 const resolvers = {
   Query: {
     currentStatus: (parent: any, args: { roomId: number }) => {
+      console.log("args", rooms[args.roomId].PlayerChoices);
       return {
         roomId: args.roomId,
-        playerOneChoice: rooms[args.roomId].playerOne,
-        playerTwoChoice: rooms[args.roomId].playerTwo,
-        result: determineWinner(
-          rooms[args.roomId].playerOne as GameOption,
-          rooms[args.roomId].playerTwo as GameOption
-        ),
+        playerChoices: rooms[args.roomId].PlayerChoices,
+        result: determineWinner(rooms[args.roomId].PlayerChoices),
       };
     },
   },
   Mutation: {
+    registerPlayer: (
+      _: any,
+      data: { playerId: number; playerName: string }
+    ) => {
+      if (players.find((player) => player.id === data.playerId)) {
+        return "User already exists";
+      } else {
+        players.push({ id: data.playerId, playerName: data.playerName });
+        return "User registered";
+      }
+    },
     createRoom: (_: any, data: { roomId: number }) => {
       if (!rooms[data.roomId]) {
-        rooms[data.roomId] = { playerOne: null, playerTwo: null };
+        rooms[data.roomId] = {
+          PlayerChoices: [],
+        };
         return true;
       }
       return false;
     },
     makeChoice: (_: any, { roomId, choice, playerId }: MakeChoice) => {
       if (!rooms[roomId]) {
-        return "Room does not exist";
-      }
-
-      if (playerId === 1) {
-        rooms[roomId].playerOne = choice;
-      } else {
-        rooms[roomId].playerTwo = choice;
-      }
-
-      const playerOne = rooms[roomId].playerOne;
-      const playerTwo = rooms[roomId].playerTwo;
-
-      if (playerOne && playerTwo) {
-        const winner = determineWinner(
-          playerOne as GameOption,
-          playerTwo as GameOption
-        );
-        pubsub.publish("GAME_UPDATE", {
-          gameUpdates: {
-            roomId,
-            playerOneChoice: rooms[roomId].playerOne,
-            playerTwoChoice: rooms[roomId].playerTwo,
-            winner,
-          },
-        });
         return {
-          playerOne: rooms[roomId].playerOne,
-          playerTwo: rooms[roomId].playerTwo,
+          error: "Room does not exist",
         };
       }
 
+      if (players.find((player) => player.id === playerId)) {
+        return {
+          error: "Player does not exist",
+        };
+      }
+
+      const playerChoice: PlayerChoice = {
+        PlayerId: playerId,
+        PlayerChoice: choice,
+      };
+      if (!rooms[roomId].PlayerChoices.includes(playerChoice)) {
+        rooms[roomId].PlayerChoices.push(playerChoice);
+      }
+
+      if (rooms[roomId].PlayerChoices.length === 2) {
+        const winner = determineWinner(rooms[roomId].PlayerChoices);
+        pubsub.publish("GAME_UPDATE", {
+          gameUpdates: {
+            roomId,
+            playerChoices: rooms[roomId].PlayerChoices,
+            winner,
+          },
+        });
+      }
+
       return {
-        playerOne: rooms[roomId].playerOne,
-        playerTwo: rooms[roomId].playerTwo,
+        playerChoices: rooms[roomId].PlayerChoices,
       };
     },
   },
@@ -73,7 +82,6 @@ const resolvers = {
       subscribe: withFilter(
         () => pubsub.asyncIterator("GAME_UPDATE"),
         (payload: any, variables: any) => {
-          console.log(payload.gameUpdates.roomId, variables.roomId);
           return payload.gameUpdates.roomId === variables.roomId;
         }
       ),

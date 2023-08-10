@@ -2,8 +2,7 @@ import { GameOption } from "./enums";
 
 export type Rooms = {
   [key: number]: {
-    playerOne: GameOption | null;
-    playerTwo: GameOption | null;
+    PlayerChoices: { PlayerId: number; PlayerChoice: GameOption }[];
   };
 };
 
@@ -12,3 +11,10 @@ export type MakeChoice = {
   choice: GameOption;
   playerId: number;
 };
+
+export type User = {
+  id: number;
+  playerName: string;
+};
+
+export type PlayerChoice = { PlayerId: number; PlayerChoice: GameOption };

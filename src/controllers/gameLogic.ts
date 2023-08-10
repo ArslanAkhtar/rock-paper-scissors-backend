@@ -1,9 +1,16 @@
 import { GameOption, GameResult } from "../utils/enums";
+import { PlayerChoice } from "../utils/types";
 
-export const determineWinner = (
-  playerOneChoice: GameOption,
-  playerTwoChoice: GameOption
-): GameResult => {
+export const determineWinner = (playerChoices: PlayerChoice[]): GameResult => {
+  if (!playerChoices[0].PlayerChoice || !playerChoices[1].PlayerChoice) {
+    return GameResult.NO_RESULT;
+  }
+  const playerOneChoice = playerChoices[0].PlayerChoice;
+  const playerTwoChoice = playerChoices[1].PlayerChoice;
+
+  if (!playerOneChoice || !playerTwoChoice) {
+    return GameResult.NO_RESULT;
+  }
   if (playerOneChoice === playerTwoChoice) {
     return GameResult.DRAW;
   }

@@ -6,20 +6,27 @@ type Query {
 
 
 type GameUpdate {
-  roomId: Int!
-  playerOneChoice: String!
-  playerTwoChoice: String!
-  result: String!
+  roomId: ID!
+  PlayerChoices: [PlayerChoice]
+  result: String
+}
+
+type PlayerChoice {
+  PlayerId: Int!
+  PlayerChoice: String
 }
 
 type Rooms {
-  playerOne: String
-  playerTwo: String
+  error: String
+  playerChoices: [PlayerChoice]
 }
+
+
 
 type Mutation {
   createRoom(roomId: ID!): Boolean
   makeChoice(roomId: ID!, choice: String!, playerId: Int!): Rooms
+  registerPlayer(playerId: ID!, playerName: String!): String!
 }
 
 type Subscription {
