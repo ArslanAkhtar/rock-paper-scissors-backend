@@ -8,6 +8,7 @@ import {
   User,
   PlayerChoice,
   CurrentStatus,
+  Payload,
 } from "../utils/types";
 import { withFilter } from "graphql-subscriptions";
 const pubsub = new PubSub();
@@ -99,12 +100,12 @@ const resolvers = {
       }
 
       if (rooms[roomId].PlayerChoices.length === 2) {
-        const winner = determineWinner(rooms[roomId].PlayerChoices);
+        const result = determineWinner(rooms[roomId].PlayerChoices);
         pubsub.publish("GAME_UPDATE", {
           gameUpdates: {
             roomId,
             playerChoices: rooms[roomId].PlayerChoices,
-            winner,
+            result,
           },
         });
       }
@@ -118,7 +119,7 @@ const resolvers = {
     gameUpdates: {
       subscribe: withFilter(
         () => pubsub.asyncIterator("GAME_UPDATE"),
-        (payload: any, variables: any) => {
+        (payload: Payload, variables: { roomId: number }) => {
           return payload.gameUpdates.roomId === variables.roomId;
         }
       ),

@@ -20,8 +20,11 @@ export type User = {
 export type PlayerChoice = { PlayerId: number; PlayerChoice: GameOption };
 
 export type CurrentStatus = {
-  error?: string;
   playerChoices?: PlayerChoice[];
   roomId?: number;
   result?: string;
+};
+
+export type Payload = {
+  gameUpdates: CurrentStatus;
 };

@@ -29,7 +29,7 @@ type Mutation {
 }
 
 type Subscription {
-  gameUpdates(roomId: ID!): String!
+  gameUpdates(roomId: ID!): GameUpdate
 }
 `;
 
