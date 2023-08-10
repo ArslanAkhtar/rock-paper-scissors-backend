@@ -1,8 +1,14 @@
-import { currentNumberArray } from "../utils/constants";
 import { PubSub } from "graphql-subscriptions";
-import { GameOption, GameResult } from "../utils/enums";
 import { determineWinner } from "../controllers/gameLogic";
-import { Rooms, MakeChoice, User, PlayerChoice } from "../utils/types";
+import { GraphQLError } from "graphql";
+
+import {
+  Rooms,
+  MakeChoice,
+  User,
+  PlayerChoice,
+  CurrentStatus,
+} from "../utils/types";
 import { withFilter } from "graphql-subscriptions";
 const pubsub = new PubSub();
 
@@ -12,27 +18,35 @@ const resolvers = {
   Query: {
     currentStatus: (parent: any, args: { roomId: number }) => {
       const currentRoom = rooms[args.roomId];
-      if (!currentRoom)
-        return {
-          error: "Room does not exist",
-        };
 
-      if (currentRoom.PlayerChoices.length === 0) {
-        return {
-          error: "Waiting for players to make a choices",
-        };
-      } else if (currentRoom.PlayerChoices.length < 2) {
-        return {
-          roomId: args.roomId,
-          playerChoices: rooms[args.roomId].PlayerChoices,
-        };
-      } else {
-        return {
-          roomId: args.roomId,
-          playerChoices: rooms[args.roomId].PlayerChoices,
-          result: determineWinner(rooms[args.roomId].PlayerChoices),
-        };
+      if (!currentRoom) {
+        throw new GraphQLError("Room does not exist.", {
+          extensions: {
+            code: "BAD_REQUEST",
+          },
+        });
       }
+
+      const { PlayerChoices } = currentRoom;
+
+      if (PlayerChoices.length === 0) {
+        throw new GraphQLError("Waiting for players to make choices", {
+          extensions: {
+            code: "BAD_REQUEST",
+          },
+        });
+      }
+
+      const statusResponse: CurrentStatus = {
+        roomId: args.roomId,
+        playerChoices: PlayerChoices,
+      };
+
+      if (PlayerChoices.length >= 2) {
+        statusResponse.result = determineWinner(PlayerChoices);
+      }
+
+      return statusResponse;
     },
   },
   Mutation: {
@@ -61,15 +75,19 @@ const resolvers = {
     },
     makeChoice: (_: any, { roomId, choice, playerId }: MakeChoice) => {
       if (!rooms[roomId]) {
-        return {
-          error: "Room does not exist",
-        };
+        throw new GraphQLError("Room does not exist.", {
+          extensions: {
+            code: "BAD_REQUEST",
+          },
+        });
       }
 
       if (!players.find((player: User) => player.id == playerId)) {
-        return {
-          error: "Player does not exist",
-        };
+        throw new GraphQLError("Player does not exist.", {
+          extensions: {
+            code: "BAD_REQUEST",
+          },
+        });
       }
 
       const playerChoice: PlayerChoice = {

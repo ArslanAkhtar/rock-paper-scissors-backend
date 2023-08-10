@@ -6,7 +6,6 @@ type Query {
 
 
 type GameUpdate {
-  error: String
   playerChoices: [PlayerChoice]
   roomId: ID
   result: String
@@ -18,7 +17,6 @@ type PlayerChoice {
 }
 
 type Rooms {
-  error: String
   playerChoices: [PlayerChoice]
 }
 
