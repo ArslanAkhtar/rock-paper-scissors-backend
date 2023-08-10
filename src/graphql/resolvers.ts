@@ -114,6 +114,18 @@ const resolvers = {
         playerChoices: rooms[roomId].PlayerChoices,
       };
     },
+    resetGame: (_: any, { roomId }: { roomId: number }) => {
+      if (!rooms[roomId]) {
+        throw new GraphQLError("Room does not exist.", {
+          extensions: {
+            code: "BAD_REQUEST",
+          },
+        });
+      }
+
+      rooms[roomId].PlayerChoices = [];
+      return true;
+    },
   },
   Subscription: {
     gameUpdates: {

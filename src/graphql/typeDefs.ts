@@ -26,6 +26,7 @@ type Mutation {
   createRoom(roomId: ID!): Boolean
   makeChoice(roomId: ID!, choice: String!, playerId: Int!): Rooms
   registerPlayer(playerId: ID!, playerName: String!): String!
+  resetGame(roomId: ID!): Boolean
 }
 
 type Subscription {
