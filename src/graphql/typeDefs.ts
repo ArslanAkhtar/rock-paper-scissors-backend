@@ -1,37 +1,42 @@
 const typeDefs = `#graphql
 
 type Query {
-  currentStatus(roomId: ID!): GameUpdate
+  getAllPlayers: [player]
+  getAllRooms: [Room]
 }
 
+type Mutation {
+  registerPlayer(playerName: String!): player!
+  createRoom: String
+  joinRoom(roomId: String!, playerId: String!): Room
+  makeChoice(roomId: String!, playerId: String!, choice: String!): Room
+}
 
-type GameUpdate {
+type player {
+  id: String
+  playerName: String
+}
+
+type Subscription {
+  gameUpdates(roomId: ID!): String
+}
+
+type Room {
+  roomId: ID!
+  users: [player]
+  games: [Game]
+}
+
+type Game {
   playerChoices: [PlayerChoice]
-  roomId: ID
   result: String
 }
 
 type PlayerChoice {
-  PlayerId: Int
+  PlayerId: ID!
   PlayerChoice: String
 }
 
-type Rooms {
-  playerChoices: [PlayerChoice]
-}
-
-
-
-type Mutation {
-  createRoom(roomId: ID!): Boolean
-  makeChoice(roomId: ID!, choice: String!, playerId: Int!): Rooms
-  registerPlayer(playerId: ID!, playerName: String!): String!
-  resetGame(roomId: ID!): Boolean
-}
-
-type Subscription {
-  gameUpdates(roomId: ID!): GameUpdate
-}
 `;
 
 export default typeDefs;

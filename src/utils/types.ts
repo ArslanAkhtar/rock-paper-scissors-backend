@@ -1,27 +1,38 @@
 import { GameOption } from "./enums";
 
-export type Rooms = {
-  [key: number]: {
-    PlayerChoices: { PlayerId: number; PlayerChoice: GameOption }[];
-  };
-};
+// export type Rooms = {
+//   [key: number]: {
+//     PlayerChoices: { PlayerId: number; PlayerChoice: GameOption }[];
+//   };
+// };
 
-export type MakeChoice = {
-  roomId: number;
-  choice: GameOption;
-  playerId: number;
+export type Room = {
+  roomId: string;
+  users: User[];
+  games: Game[];
 };
 
 export type User = {
-  id: number;
+  id: string;
   playerName: string;
 };
 
-export type PlayerChoice = { PlayerId: number; PlayerChoice: GameOption };
+export type Game = {
+  playerChoices: PlayerChoice[];
+  result?: string;
+};
+
+export type MakeChoice = {
+  roomId: string;
+  choice: GameOption;
+  playerId: string;
+};
+
+export type PlayerChoice = { PlayerId: string; PlayerChoice: GameOption };
 
 export type CurrentStatus = {
   playerChoices?: PlayerChoice[];
-  roomId?: number;
+  roomId?: string;
   result?: string;
 };
 
