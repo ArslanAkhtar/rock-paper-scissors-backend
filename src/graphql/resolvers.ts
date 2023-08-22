@@ -2,15 +2,7 @@ import { PubSub } from "graphql-subscriptions";
 import { determineWinner } from "../controllers/gameLogic";
 import { GraphQLError } from "graphql";
 import { randomUUID } from "crypto";
-import {
-  Room,
-  MakeChoice,
-  User,
-  PlayerChoice,
-  Game,
-  CurrentStatus,
-  Payload,
-} from "../utils/types";
+import { Room, MakeChoice, User, PlayerChoice, Payload } from "../utils/types";
 import { withFilter } from "graphql-subscriptions";
 const pubsub = new PubSub();
 
@@ -46,7 +38,11 @@ const resolvers = {
       rooms.push({
         roomId,
         users: [],
-        games: [],
+        games: [
+          {
+            playerChoices: [],
+          },
+        ],
       });
 
       return roomId;
@@ -120,37 +116,44 @@ const resolvers = {
         PlayerChoice: choice,
       };
 
-      if (room.games.length == 0) {
-        room.games.push({
-          playerChoices: [playerChoice],
-        });
-      } else {
-        room.games[room.games.length - 1].playerChoices.push(playerChoice);
-      }
-
-      console.log(
-        " game.playerChoices.length",
-        room.games[room.games.length - 1].playerChoices.length
-      );
-      console.log(" room.users.length", room.users.length);
+      const currentGameCount =
+        room.games !== undefined && room.games.length !== 0
+          ? room.games.length - 1
+          : 0;
 
       if (
-        room.games[room.games.length - 1].playerChoices.length ===
-        room.users.length
+        room.games[currentGameCount].playerChoices.find(
+          (playerChoice) => playerChoice.PlayerId === playerId
+        )
       ) {
-        console.log(
-          "game.playerChoices",
-          room.games[room.games.length - 1].playerChoices
+        throw new GraphQLError("Player already made choice.", {
+          extensions: {
+            code: "BAD_REQUEST",
+          },
+        });
+      }
+
+      room.games[currentGameCount].playerChoices.push(playerChoice);
+
+      if (
+        room.games[currentGameCount].playerChoices.length === room.users.length
+      ) {
+        console.log("Game is over");
+        const result = determineWinner(
+          room.games[currentGameCount].playerChoices
         );
 
-        const result = determineWinner(
-          room.games[room.games.length - 1].playerChoices
-        );
+        console.log(result);
         pubsub.publish("GAME_UPDATE", {
           gameUpdates: {
             roomId,
-            playerChoices: room.games[room.games.length - 1].playerChoices,
-            result,
+            users: room.users,
+            games: [
+              {
+                playerChoices: room.games[currentGameCount].playerChoices,
+                result,
+              },
+            ],
           },
         });
       }

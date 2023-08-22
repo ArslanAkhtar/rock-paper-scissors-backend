@@ -18,13 +18,14 @@ type player {
 }
 
 type Subscription {
-  gameUpdates(roomId: ID!): String
+  gameUpdates(roomId: ID!): Room
 }
 
 type Room {
   roomId: ID!
   users: [player]
   games: [Game]
+  result: String
 }
 
 type Game {
