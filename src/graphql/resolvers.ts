@@ -11,13 +11,9 @@ const players: User[] = [];
 
 const resolvers = {
   Query: {
-    getAllPlayers: () => {
-      return players;
-    },
+    getAllPlayers: () => players,
 
-    getAllRooms: () => {
-      return rooms;
-    },
+    getAllRooms: () => rooms,
   },
   Mutation: {
     registerPlayer: (_: any, data: { playerName: string }) => {
@@ -138,12 +134,10 @@ const resolvers = {
       if (
         room.games[currentGameCount].playerChoices.length === room.users.length
       ) {
-        console.log("Game is over");
         const result = determineWinner(
           room.games[currentGameCount].playerChoices
         );
 
-        console.log(result);
         pubsub.publish("GAME_UPDATE", {
           gameUpdates: {
             roomId,
