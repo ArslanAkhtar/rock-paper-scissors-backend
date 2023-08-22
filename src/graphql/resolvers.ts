@@ -97,7 +97,7 @@ const resolvers = {
         });
       }
 
-      const player = players.find((player) => player.id === playerId);
+      const player = room.users.find((player) => player.id === playerId);
 
       if (!player) {
         throw new GraphQLError("Player does not exist.", {
