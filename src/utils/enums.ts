@@ -2,11 +2,12 @@ export enum GameOption {
   ROCK = "ROCK",
   PAPER = "PAPER",
   SCISSORS = "SCISSORS",
+  LIZARD = "LIZARD",
+  SPOCK = "SPOCK",
 }
 
 export enum GameResult {
-  PLAYER_ONE_WINS = "PLAYER ONE WINS",
-  PLAYER_TWO_WINS = "PLAYER TWO WINS",
+  PLAYER_WINS = " WINS",
   DRAW = "DRAW",
   NO_RESULT = "NO RESULT",
 }

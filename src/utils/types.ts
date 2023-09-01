@@ -1,11 +1,5 @@
 import { GameOption } from "./enums";
 
-// export type Rooms = {
-//   [key: number]: {
-//     PlayerChoices: { PlayerId: number; PlayerChoice: GameOption }[];
-//   };
-// };
-
 export type Room = {
   roomId: string;
   users: User[];
@@ -38,4 +32,9 @@ export type CurrentStatus = {
 
 export type Payload = {
   gameUpdates: CurrentStatus;
+};
+
+export type RPSOption = {
+  name: string;
+  winsFrom: string[];
 };

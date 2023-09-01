@@ -3,6 +3,7 @@ const typeDefs = `#graphql
 type Query {
   getAllPlayers: [player]
   getAllRooms: [Room]
+  getGameResult(roomId: String!): Room
 }
 
 type Mutation {
@@ -25,7 +26,6 @@ type Room {
   roomId: ID!
   users: [player]
   games: [Game]
-  result: String
 }
 
 type Game {

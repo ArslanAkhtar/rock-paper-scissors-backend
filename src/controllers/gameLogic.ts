@@ -1,30 +1,49 @@
 import { GameOption, GameResult } from "../utils/enums";
-import { PlayerChoice } from "../utils/types";
+import { PlayerChoice, User, RPSOption } from "../utils/types";
 
-export const determineWinner = (playerChoices: PlayerChoice[]): GameResult => {
+const gameRules: RPSOption[] = [
+  { name: GameOption.ROCK, winsFrom: [GameOption.LIZARD, GameOption.SCISSORS] },
+  {
+    name: GameOption.SCISSORS,
+    winsFrom: [GameOption.PAPER, GameOption.LIZARD],
+  },
+  { name: GameOption.PAPER, winsFrom: [GameOption.ROCK, GameOption.SPOCK] },
+  { name: GameOption.LIZARD, winsFrom: [GameOption.SPOCK, GameOption.PAPER] },
+  { name: GameOption.SPOCK, winsFrom: [GameOption.SCISSORS, GameOption.ROCK] },
+];
+
+export const determineWinner = (
+  playerChoices: PlayerChoice[],
+  users: User[]
+): string => {
   if (!playerChoices[0].PlayerChoice || !playerChoices[1].PlayerChoice) {
     return GameResult.NO_RESULT;
   }
-  const playerOneChoice = playerChoices[0].PlayerChoice;
-  const playerTwoChoice = playerChoices[1].PlayerChoice;
 
-  if (!playerOneChoice || !playerTwoChoice) {
-    return GameResult.NO_RESULT;
-  }
-  if (playerOneChoice === playerTwoChoice) {
+  const usersWithChoices = users.map((user) => {
+    const playerChoice = playerChoices.find(
+      (playerChoice) => playerChoice.PlayerId === user.id
+    );
+    const winsFrom = gameRules.find(
+      (option) => option.name === playerChoice?.PlayerChoice
+    )?.winsFrom;
+    return {
+      ...user,
+      PlayerChoice: playerChoice?.PlayerChoice,
+      winsFrom,
+    };
+  });
+
+  const playerOne = usersWithChoices[0];
+  const playerTwo = usersWithChoices[1];
+
+  if (playerOne.PlayerChoice === playerTwo.PlayerChoice) {
     return GameResult.DRAW;
-  }
-
-  if (
-    (playerOneChoice === GameOption.ROCK &&
-      playerTwoChoice === GameOption.SCISSORS) ||
-    (playerOneChoice === GameOption.PAPER &&
-      playerTwoChoice === GameOption.ROCK) ||
-    (playerOneChoice === GameOption.SCISSORS &&
-      playerTwoChoice === GameOption.PAPER)
+  } else if (
+    playerOne.winsFrom?.includes(playerTwo.PlayerChoice as GameOption)
   ) {
-    return GameResult.PLAYER_ONE_WINS;
+    return playerOne.playerName.toUpperCase() + GameResult.PLAYER_WINS;
+  } else {
+    return playerTwo.playerName.toUpperCase() + GameResult.PLAYER_WINS;
   }
-
-  return GameResult.PLAYER_TWO_WINS;
 };

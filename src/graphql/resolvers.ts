@@ -14,6 +14,50 @@ const resolvers = {
     getAllPlayers: () => players,
 
     getAllRooms: () => rooms,
+
+    getGameResult: (_: any, data: { roomId: string }) => {
+      const room = rooms.find((room) => room.roomId === data.roomId);
+
+      if (!room) {
+        throw new GraphQLError("Room does not exist.", {
+          extensions: {
+            code: "BAD_REQUEST",
+          },
+        });
+      }
+
+      if (room.games.length === 0) {
+        throw new GraphQLError("Game has not started yet.", {
+          extensions: {
+            code: "BAD_REQUEST",
+          },
+        });
+      }
+
+      const currentGameCount =
+        room.games !== undefined && room.games.length !== 0
+          ? room.games.length - 1
+          : 0;
+
+      if (
+        room.games[currentGameCount].playerChoices.length !== room.users.length
+      ) {
+        throw new GraphQLError("Game has not ended yet.", {
+          extensions: {
+            code: "BAD_REQUEST",
+          },
+        });
+      }
+
+      const result = determineWinner(
+        room.games[currentGameCount].playerChoices,
+        room.users
+      );
+
+      room.games[currentGameCount].result = result;
+
+      return room;
+    },
   },
   Mutation: {
     registerPlayer: (_: any, data: { playerName: string }) => {
@@ -135,7 +179,8 @@ const resolvers = {
         room.games[currentGameCount].playerChoices.length === room.users.length
       ) {
         const result = determineWinner(
-          room.games[currentGameCount].playerChoices
+          room.games[currentGameCount].playerChoices,
+          room.users
         );
 
         pubsub.publish("GAME_UPDATE", {
